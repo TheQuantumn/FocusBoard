@@ -14,7 +14,9 @@ model User {
   createdAt DateTime @default(now())
 
   sessions  Session[]
+  tasks     Task[]
 }
+
 
 model Session {
   id        String   @id @default(cuid())
@@ -23,3 +25,20 @@ model Session {
   createdAt DateTime @default(now())
   expiresAt DateTime
 }
+enum TaskStatus {
+  TODO
+  ONGOING
+  COMPLETED
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  status      TaskStatus @default(TODO)
+  createdAt   DateTime   @default(now())
+
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
