@@ -15,18 +15,15 @@ export default function BoardClient() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Modal + task creation state
-  const [showModal, setShowModal] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
 
   async function loadTasks() {
-    const res = await fetch("/api/tasks", {
-      credentials: "include",
-    });
-
+    const res = await fetch("/api/tasks", { credentials: "include" });
     const data = await res.json();
     setTasks(Array.isArray(data) ? data : []);
     setLoading(false);
@@ -39,8 +36,6 @@ export default function BoardClient() {
   async function createTask() {
     if (!title.trim()) return;
 
-    setCreating(true);
-
     await fetch("/api/tasks", {
       method: "POST",
       credentials: "include",
@@ -50,13 +45,28 @@ export default function BoardClient() {
 
     setTitle("");
     setDescription("");
-    setCreating(false);
-    setShowModal(false);
+    setShowAdd(false);
+    await loadTasks();
+  }
+
+  async function deleteCompleted() {
+    const completed = tasks.filter((t) => t.status === "COMPLETED");
+
+    await Promise.all(
+      completed.map((t) =>
+        fetch(`/api/tasks/${t.id}`, {
+          method: "DELETE",
+          credentials: "include",
+        })
+      )
+    );
 
     await loadTasks();
   }
 
   async function handleDrop(taskId: string, newStatus: TaskStatus) {
+    setDragOverStatus(null);
+
     await fetch(`/api/tasks/${taskId}`, {
       method: "PUT",
       credentials: "include",
@@ -67,48 +77,84 @@ export default function BoardClient() {
     await loadTasks();
   }
 
-  // 🔥 DELETE ALL COMPLETED TASKS
-  async function deleteCompletedTasks() {
-    setDeleting(true);
-
-    const completedTasks = tasks.filter(
-      (task) => task.status === "COMPLETED"
-    );
-
-    for (const task of completedTasks) {
-      await fetch(`/api/tasks/${task.id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-    }
-
-    setDeleting(false);
-    await loadTasks();
-  }
-
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="muted">Loading…</p>;
 
   return (
-    <div>
-      {/* 🔹 MODAL */}
-      {showModal && (
+    <>
+      {/* ================= BOARD ================= */}
+      <div className="card">
+        <h2 style={{ marginBottom: "20px" }}>Task Board</h2>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "20px",
+          }}
+        >
+          <Column
+            title="To Do"
+            status="TODO"
+            tasks={tasks}
+            draggingId={draggingId}
+            dragOverStatus={dragOverStatus}
+            setDragOverStatus={setDragOverStatus}
+            onDropTask={handleDrop}
+            onDragStart={setDraggingId}
+            onDragEnd={() => setDraggingId(null)}
+            rightAction={<button onClick={() => setShowAdd(true)}>＋</button>}
+          />
+
+          <Column
+            title="Ongoing"
+            status="ONGOING"
+            tasks={tasks}
+            draggingId={draggingId}
+            dragOverStatus={dragOverStatus}
+            setDragOverStatus={setDragOverStatus}
+            onDropTask={handleDrop}
+            onDragStart={setDraggingId}
+            onDragEnd={() => setDraggingId(null)}
+          />
+
+          <Column
+            title="Completed"
+            status="COMPLETED"
+            tasks={tasks}
+            draggingId={draggingId}
+            dragOverStatus={dragOverStatus}
+            setDragOverStatus={setDragOverStatus}
+            onDropTask={handleDrop}
+            onDragStart={setDraggingId}
+            onDragEnd={() => setDraggingId(null)}
+            rightAction={<button onClick={deleteCompleted}>🗑</button>}
+          />
+        </div>
+      </div>
+
+      {/* ================= MODAL (VIEWPORT) ================= */}
+      {showAdd && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.4)",
+            background: "rgba(0,0,0,0.75)",
             display: "flex",
-            justifyContent: "center",
             alignItems: "center",
+            justifyContent: "center",
             zIndex: 1000,
           }}
         >
           <div
             style={{
-              background: "#fff",
-              padding: "20px",
-              borderRadius: "8px",
-              width: "320px",
+              width: "360px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: "14px",
+              padding: "22px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "14px",
             }}
           >
             <div
@@ -116,111 +162,92 @@ export default function BoardClient() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "12px",
               }}
             >
-              <h3>Add Task</h3>
-              <button onClick={() => setShowModal(false)}>✕</button>
+              <div style={{ fontWeight: 600 }}>Add Task</div>
+              <button
+                onClick={() => setShowAdd(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
             </div>
 
             <input
-              type="text"
               placeholder="Task title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px",
-                marginBottom: "8px",
-              }}
             />
 
             <textarea
               placeholder="Description (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px",
-                marginBottom: "12px",
-              }}
+              rows={3}
             />
 
-            <button
-              onClick={createTask}
-              disabled={creating}
-              style={{
-                width: "100%",
-                padding: "8px",
-                cursor: "pointer",
-              }}
-            >
-              {creating ? "Adding..." : "Add Task"}
-            </button>
+            <button onClick={createTask}>Add Task</button>
           </div>
         </div>
       )}
-
-      {/* 🔹 KANBAN BOARD */}
-      <div style={{ display: "flex", gap: "16px" }}>
-        <Column
-          title="To Do"
-          status="TODO"
-          tasks={tasks}
-          onDropTask={handleDrop}
-          onAddTask={() => setShowModal(true)}
-        />
-
-        <Column
-          title="Ongoing"
-          status="ONGOING"
-          tasks={tasks}
-          onDropTask={handleDrop}
-        />
-
-        <Column
-          title="Completed"
-          status="COMPLETED"
-          tasks={tasks}
-          onDropTask={handleDrop}
-          onDeleteCompleted={deleteCompletedTasks}
-          deleting={deleting}
-        />
-      </div>
-    </div>
+    </>
   );
 }
+
+/* ================= COLUMN ================= */
 
 function Column({
   title,
   status,
   tasks,
+  draggingId,
+  dragOverStatus,
+  setDragOverStatus,
   onDropTask,
-  onAddTask,
-  onDeleteCompleted,
-  deleting,
+  onDragStart,
+  onDragEnd,
+  rightAction,
 }: {
   title: string;
   status: TaskStatus;
   tasks: Task[];
+  draggingId: string | null;
+  dragOverStatus: TaskStatus | null;
+  setDragOverStatus: (s: TaskStatus | null) => void;
   onDropTask: (taskId: string, status: TaskStatus) => void;
-  onAddTask?: () => void;
-  onDeleteCompleted?: () => void;
-  deleting?: boolean;
+  onDragStart: (id: string) => void;
+  onDragEnd: () => void;
+  rightAction?: React.ReactNode;
 }) {
+  const isDragOver = dragOverStatus === status;
+
   return (
     <div
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOverStatus(status);
+      }}
       onDrop={(e) => {
         const taskId = e.dataTransfer.getData("taskId");
         if (taskId) onDropTask(taskId, status);
       }}
       style={{
-        flex: 1,
-        padding: "12px",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        minHeight: "200px",
+        border: "1px solid var(--border-subtle)",
+        borderRadius: "14px",
+        padding: "16px",
+        minHeight: "360px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px",
+        background: isDragOver
+          ? "rgba(255,255,255,0.03)"
+          : "transparent",
+        transition: "background 120ms ease",
       }}
     >
       <div
@@ -228,50 +255,78 @@ function Column({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "8px",
         }}
       >
-        <h3>{title}</h3>
-
-        {status === "TODO" && (
-          <button onClick={onAddTask} style={{ cursor: "pointer" }}>
-            +
-          </button>
-        )}
-
-        {status === "COMPLETED" && (
-          <button
-            onClick={onDeleteCompleted}
-            disabled={deleting}
-            title="Delete all completed tasks"
-            style={{ cursor: "pointer" }}
-          >
-            🗑️
-          </button>
-        )}
+        <div className="section-label">{title}</div>
+        {rightAction}
       </div>
 
       {tasks
         .filter((t) => t.status === status)
-        .map((task) => (
-          <div
-            key={task.id}
-            draggable
-            onDragStart={(e) =>
-              e.dataTransfer.setData("taskId", task.id)
-            }
-            style={{
-              padding: "8px",
-              marginBottom: "8px",
-              background: "#f5f5f5",
-              borderRadius: "6px",
-              cursor: "grab",
-            }}
-          >
-            <strong>{task.title}</strong>
-            <p style={{ fontSize: "12px" }}>{task.description}</p>
-          </div>
-        ))}
+        .map((task) => {
+          const isDragging = draggingId === task.id;
+
+          return (
+            <div
+              key={task.id}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData("taskId", task.id);
+                onDragStart(task.id);
+              }}
+              onDragEnd={onDragEnd}
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-subtle)",
+                borderLeft: `4px solid ${
+                  status === "TODO"
+                    ? "var(--accent-blue)"
+                    : status === "ONGOING"
+                    ? "var(--accent-purple)"
+                    : "var(--accent-green)"
+                }`,
+                borderRadius: "10px",
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+                cursor: "grab",
+                opacity: isDragging ? 0.5 : 1,
+                transform: isDragging ? "scale(0.97)" : "scale(1)",
+                transition:
+                  "transform 120ms ease, opacity 120ms ease, background 120ms ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "var(--bg-hover)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "var(--bg-card)")
+              }
+            >
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                }}
+              >
+                {task.title}
+              </div>
+
+              {task.description && (
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--text-muted)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {task.description}
+                </div>
+              )}
+            </div>
+          );
+        })}
     </div>
   );
 }

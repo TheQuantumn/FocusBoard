@@ -1,156 +1,224 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+
+const RADIUS = 88;
+const STROKE = 12;
+const SIZE = 220;
+const CENTER = SIZE / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export default function Pomodoro() {
-  const [studyTime, setStudyTime] = useState(25);
-  const [breakTime, setBreakTime] = useState(5);
+  const [studyMinutes, setStudyMinutes] = useState(25);
+  const [breakMinutes, setBreakMinutes] = useState(5);
 
   const [mode, setMode] = useState<"FOCUS" | "BREAK">("FOCUS");
-  const [secondsLeft, setSecondsLeft] = useState(25 * 60);
-  const [isRunning, setIsRunning] = useState(false);
+  const [running, setRunning] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(studyMinutes * 60);
 
   const [showSettings, setShowSettings] = useState(false);
+  const [tempStudy, setTempStudy] = useState(studyMinutes);
+  const [tempBreak, setTempBreak] = useState(breakMinutes);
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const totalSeconds =
+    mode === "FOCUS" ? studyMinutes * 60 : breakMinutes * 60;
 
-  // 🔹 Load saved settings
+  /* ================= TIMER LOGIC ================= */
+
   useEffect(() => {
-    fetch("/api/pomodoro", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.studyTime) {
-          setStudyTime(data.studyTime);
-          setBreakTime(data.breakTime);
-          setSecondsLeft(data.studyTime * 60);
-        }
-      });
-  }, []);
+    if (!running) return;
 
-  // 🔹 Timer engine
-  useEffect(() => {
-    if (!isRunning || showSettings) return;
-
-    intervalRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          switchMode();
-          return 0;
+    const timer = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          if (mode === "FOCUS") {
+            setMode("BREAK");
+            return breakMinutes * 60;
+          } else {
+            setMode("FOCUS");
+            return studyMinutes * 60;
+          }
         }
-        return prev - 1;
+        return s - 1;
       });
     }, 1000);
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isRunning, showSettings]);
+    return () => clearInterval(timer);
+  }, [running, mode, studyMinutes, breakMinutes]);
 
-  function switchMode() {
-    if (mode === "FOCUS") {
-      setMode("BREAK");
-      setSecondsLeft(breakTime * 60);
-    } else {
-      setMode("FOCUS");
-      setSecondsLeft(studyTime * 60);
-    }
-  }
-
-  function skipBreak() {
-    setMode("FOCUS");
-    setSecondsLeft(studyTime * 60);
-  }
-
-  async function saveSettings() {
-    await fetch("/api/pomodoro", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studyTime, breakTime }),
-    });
-
-    setMode("FOCUS");
-    setSecondsLeft(studyTime * 60);
-    setShowSettings(false);
-  }
-
-  function reset() {
-    setIsRunning(false);
-    setSecondsLeft(
-      mode === "FOCUS" ? studyTime * 60 : breakTime * 60
-    );
-  }
+  const progress = 1 - secondsLeft / totalSeconds;
+  const dashOffset = CIRCUMFERENCE * (1 - progress);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
 
+  const accent =
+    mode === "FOCUS"
+      ? "var(--accent-purple)"
+      : "var(--accent-green)";
+
+  /* ================= UI ================= */
+
   return (
     <div
+      className="card"
       style={{
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        padding: "16px",
-        maxWidth: "280px",
+        width: "320px",
+        padding: "20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "18px",
         position: "relative",
       }}
     >
-      {/* ⚙️ SETTINGS ICON */}
-      <button
-        onClick={() => {
-          setIsRunning(false);
-          setShowSettings(true);
-        }}
+      {/* Header */}
+      <div
         style={{
-          position: "absolute",
-          top: "8px",
-          right: "8px",
-          cursor: "pointer",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        ⚙️
-      </button>
+        <div className="section-label">Pomodoro</div>
 
-      <h3>Pomodoro</h3>
-      <p style={{ fontWeight: "bold" }}>
-        {mode === "FOCUS" ? "FOCUS NOW" : "BREAK"}
-      </p>
-
-      <h2>
-        {minutes}:{seconds.toString().padStart(2, "0")}
-      </h2>
-
-      <div style={{ marginBottom: "12px" }}>
-        <button onClick={() => setIsRunning(!isRunning)}>
-          {isRunning ? "Pause" : "Start"}
-        </button>
-        <button onClick={reset} style={{ marginLeft: "8px" }}>
-          Reset
+        <button
+          onClick={() => setShowSettings(true)}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--text-muted)",
+            cursor: "pointer",
+            fontSize: "16px",
+          }}
+        >
+          ⚙
         </button>
       </div>
 
-      {mode === "BREAK" && (
-        <button onClick={skipBreak}>Skip Break</button>
-      )}
+      {/* Timer Dial */}
+      <div
+        style={{
+          width: SIZE,
+          height: SIZE,
+          margin: "0 auto",
+          position: "relative",
+        }}
+      >
+        <svg width={SIZE} height={SIZE}>
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={RADIUS}
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth={STROKE}
+            fill="none"
+          />
 
-      {/* 🔹 SETTINGS MODAL */}
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={RADIUS}
+            stroke={accent}
+            strokeWidth={STROKE}
+            fill="none"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={dashOffset}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${CENTER} ${CENTER})`}
+          />
+        </svg>
+
+        {/* Center Content */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "6px",
+          }}
+        >
+          <div
+            className="numeric"
+            style={{
+              fontSize: "32px",
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {minutes}:{seconds.toString().padStart(2, "0")}
+          </div>
+
+          <div
+            style={{
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "0.14em",
+              color: accent,
+            }}
+          >
+            {mode === "FOCUS" ? "FOCUS NOW" : "BREAK"}
+          </div>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div style={{ display: "flex", gap: "10px" }}>
+        <button style={{ flex: 1 }} onClick={() => setRunning(true)}>
+          Start
+        </button>
+
+        <button
+          style={{ flex: 1 }}
+          onClick={() => {
+            setRunning(false);
+            setMode("FOCUS");
+            setSecondsLeft(studyMinutes * 60);
+          }}
+        >
+          Reset
+        </button>
+
+        {mode === "BREAK" && (
+          <button
+            style={{ flex: 1 }}
+            onClick={() => {
+              setMode("FOCUS");
+              setSecondsLeft(studyMinutes * 60);
+            }}
+          >
+            Skip
+          </button>
+        )}
+      </div>
+
+      {/* ================= SETTINGS MODAL ================= */}
+
       {showSettings && (
         <div
           style={{
-            position: "fixed",
+            position: "absolute",
             inset: 0,
-            background: "rgba(0,0,0,0.4)",
+            background: "rgba(0,0,0,0.65)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            zIndex: 1000,
+            borderRadius: "12px",
+            zIndex: 10,
           }}
         >
           <div
             style={{
-              background: "#fff",
+              width: "280px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: "12px",
               padding: "20px",
-              borderRadius: "8px",
-              width: "260px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
             }}
           >
             <div
@@ -158,40 +226,57 @@ export default function Pomodoro() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "12px",
               }}
             >
-              <h4>Settings</h4>
-              <button onClick={() => setShowSettings(false)}>✕</button>
+              <div style={{ fontWeight: 600 }}>Settings</div>
+
+              <button
+                onClick={() => setShowSettings(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
             </div>
 
-            <label>
-              Study (min)
+            <div>
+              <label style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                Study (minutes)
+              </label>
               <input
                 type="number"
-                value={studyTime}
-                onChange={(e) =>
-                  setStudyTime(Number(e.target.value))
-                }
-                style={{ width: "100%", marginBottom: "8px" }}
+                value={tempStudy}
+                onChange={(e) => setTempStudy(+e.target.value)}
+                style={{ width: "100%", marginTop: "4px" }}
               />
-            </label>
+            </div>
 
-            <label>
-              Break (min)
+            <div>
+              <label style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                Break (minutes)
+              </label>
               <input
                 type="number"
-                value={breakTime}
-                onChange={(e) =>
-                  setBreakTime(Number(e.target.value))
-                }
-                style={{ width: "100%", marginBottom: "12px" }}
+                value={tempBreak}
+                onChange={(e) => setTempBreak(+e.target.value)}
+                style={{ width: "100%", marginTop: "4px" }}
               />
-            </label>
+            </div>
 
             <button
-              onClick={saveSettings}
-              style={{ width: "100%" }}
+              onClick={() => {
+                setStudyMinutes(tempStudy);
+                setBreakMinutes(tempBreak);
+                setMode("FOCUS");
+                setRunning(false);
+                setSecondsLeft(tempStudy * 60);
+                setShowSettings(false);
+              }}
+              style={{ marginTop: "6px" }}
             >
               Save
             </button>
