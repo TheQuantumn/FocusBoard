@@ -47,6 +47,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
+      secure: false, //  REQUIRED for localhost
     });
 
     return response;
