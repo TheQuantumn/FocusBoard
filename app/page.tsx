@@ -1,66 +1,131 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import DarkVeil from "./components/DarkVeil";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <main
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        background: "var(--bg-main)",
+        overflow: "hidden",
+        isolation: "isolate", // 🔑 forces correct stacking
+      }}
+    >
+      {/* ===== BACKGROUND ===== */}
+      <DarkVeil />
+
+     
+
+      {/* ===== HERO CONTENT ===== */}
+     <section
+  style={{
+    position: "relative",
+    zIndex: 2,
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 24px",
+    textAlign: "center",
+  }}
+>
+  <div
+    style={{
+      maxWidth: "1100px",
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "28px",
+    }}
+  >
+    {/* Badge */}
+    <div
+      style={{
+        fontSize: "12px",
+        fontWeight: 600,
+        letterSpacing: "0.12em",
+        color: "var(--accent-purple)",
+        textTransform: "uppercase",
+      }}
+    >
+      Productivity • Focus • Flow
     </div>
+
+    {/* Headline */}
+    <h1
+      style={{
+        fontSize: "56px",
+        fontWeight: 700,
+        lineHeight: 1.1,
+        letterSpacing: "-0.03em",
+        maxWidth: "900px",
+        margin: 0,
+      }}
+    >
+      Focus better.
+      <br />
+      Get things done.
+    </h1>
+
+    {/* Subheading */}
+    <p
+      style={{
+        fontSize: "18px",
+        color: "var(--text-secondary)",
+        maxWidth: "640px",
+        lineHeight: 1.6,
+        margin: 0,
+      }}
+    >
+      FocusBoard is a modern productivity dashboard with a Pomodoro timer,
+      Kanban task board, and ambient focus tools — built for deep work.
+    </p>
+
+    {/* CTAs */}
+    <div style={{ display: "flex", gap: "14px", marginTop: "12px" }}>
+      <a
+        href="/signup"
+        style={{
+          background: "var(--accent-purple)",
+          color: "#000",
+          padding: "12px 20px",
+          borderRadius: "10px",
+          fontWeight: 600,
+          textDecoration: "none",
+        }}
+      >
+        Get Started
+      </a>
+
+      <a
+        href="/login"
+        style={{
+          border: "1px solid var(--border-subtle)",
+          padding: "12px 20px",
+          borderRadius: "10px",
+          fontWeight: 600,
+          color: "var(--text-primary)",
+          textDecoration: "none",
+        }}
+      >
+        Log in
+      </a>
+    </div>
+
+    {/* Footer text */}
+    <div
+      style={{
+        marginTop: "24px",
+        fontSize: "13px",
+        color: "var(--text-muted)",
+      }}
+    >
+      Built with Next.js • TypeScript • Prisma
+    </div>
+  </div>
+</section>
+
+    </main>
   );
 }

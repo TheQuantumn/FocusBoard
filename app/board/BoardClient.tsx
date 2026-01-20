@@ -132,7 +132,7 @@ export default function BoardClient() {
         </div>
       </div>
 
-      {/* ================= MODAL (VIEWPORT) ================= */}
+      {/* ================= MODAL (VIEWPORT LEVEL) ================= */}
       {showAdd && (
         <div
           style={{
@@ -143,20 +143,23 @@ export default function BoardClient() {
             alignItems: "center",
             justifyContent: "center",
             zIndex: 1000,
+            padding: "24px",
           }}
         >
           <div
             style={{
-              width: "360px",
+              width: "420px",
+              maxWidth: "100%",
               background: "var(--bg-card)",
               border: "1px solid var(--border-subtle)",
-              borderRadius: "14px",
-              padding: "22px",
+              borderRadius: "16px",
+              padding: "24px",
               display: "flex",
               flexDirection: "column",
-              gap: "14px",
+              gap: "20px",
             }}
           >
+            {/* Header */}
             <div
               style={{
                 display: "flex",
@@ -164,13 +167,16 @@ export default function BoardClient() {
                 alignItems: "center",
               }}
             >
-              <div style={{ fontWeight: 600 }}>Add Task</div>
+              <div style={{ fontSize: "16px", fontWeight: 600 }}>
+                Add Task
+              </div>
               <button
                 onClick={() => setShowAdd(false)}
                 style={{
                   background: "transparent",
                   border: "none",
                   color: "var(--text-muted)",
+                  fontSize: "18px",
                   cursor: "pointer",
                 }}
               >
@@ -178,20 +184,95 @@ export default function BoardClient() {
               </button>
             </div>
 
-            <input
-              placeholder="Task title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+            {/* Body */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <label
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  Title
+                </label>
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Finish Kanban UI"
+                  style={{
+                    height: "40px",
+                    padding: "0 12px",
+                    borderRadius: "8px",
+                    border: "1px solid var(--border-subtle)",
+                    background: "var(--bg-main)",
+                    color: "var(--text-primary)",
+                  }}
+                />
+              </div>
 
-            <textarea
-              placeholder="Description (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            />
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <label
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  Description (optional)
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  placeholder="Additional details"
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid var(--border-subtle)",
+                    background: "var(--bg-main)",
+                    color: "var(--text-primary)",
+                    resize: "none",
+                  }}
+                />
+              </div>
+            </div>
 
-            <button onClick={createTask}>Add Task</button>
+            {/* Footer */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+              }}
+            >
+              <button
+                onClick={() => setShowAdd(false)}
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-secondary)",
+                  padding: "8px 14px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={createTask}
+                style={{
+                  background: "var(--accent-purple)",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Add Task
+              </button>
+            </div>
           </div>
         </div>
       )}

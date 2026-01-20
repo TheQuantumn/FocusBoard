@@ -1,21 +1,100 @@
 :root {
-  --bg-main: #0B0B0F;
-  --bg-card: #14141A;
-  --bg-hover: #1B1B23;
+  --bg-main: #0b0b0f;
+  --bg-card: #14141a;
+  --bg-hover: #1b1b23;
 
-  --border-subtle: #2A2A35;
+  --border-subtle: #2a2a35;
 
-  --text-primary: #FFFFFF;
-  --text-secondary: #B4B4C0;
-  --text-muted: #7A7A8C;
+  --text-primary: #ffffff;
+  --text-secondary: #b4b4c0;
+  --text-muted: #7a7a8c;
 
-  --accent-purple: #A855F7;
-  --accent-pink: #EC4899;
-  --accent-green: #22C55E;
-  --accent-blue: #60A5FA;
+  --accent-purple: #a855f7;
+  --accent-pink: #ec4899;
+  --accent-green: #22c55e;
+  --accent-blue: #60a5fa;
 }
 
+/* ===== BASE ===== */
+
+html,
 body {
+  margin: 0;
+  padding: 0;
   background: var(--bg-main);
   color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ===== TYPOGRAPHY ===== */
+
+h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Column titles, small headers */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ===== CARD BASE ===== */
+
+.card {
+  
+  background: rgba(20, 20, 26, 0.82); /* slightly transparent */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+/* ===== TASK HELPERS ===== */
+
+.task-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.task-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ===== UTIL ===== */
+
+.muted {
+  color: var(--text-muted);
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
 }

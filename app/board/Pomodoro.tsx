@@ -60,167 +60,170 @@ export default function Pomodoro() {
   /* ================= UI ================= */
 
   return (
-    <div
-      className="card"
-      style={{
-        width: "320px",
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "18px",
-        position: "relative",
-      }}
-    >
-      {/* Header */}
+    <>
+      {/* ================= CARD ================= */}
       <div
+        className="card"
         style={{
+          width: "320px",
+          padding: "20px",
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          flexDirection: "column",
+          gap: "18px",
         }}
       >
-        <div className="section-label">Pomodoro</div>
-
-        <button
-          onClick={() => setShowSettings(true)}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "var(--text-muted)",
-            cursor: "pointer",
-            fontSize: "16px",
-          }}
-        >
-          ⚙
-        </button>
-      </div>
-
-      {/* Timer Dial */}
-      <div
-        style={{
-          width: SIZE,
-          height: SIZE,
-          margin: "0 auto",
-          position: "relative",
-        }}
-      >
-        <svg width={SIZE} height={SIZE}>
-          <circle
-            cx={CENTER}
-            cy={CENTER}
-            r={RADIUS}
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth={STROKE}
-            fill="none"
-          />
-
-          <circle
-            cx={CENTER}
-            cy={CENTER}
-            r={RADIUS}
-            stroke={accent}
-            strokeWidth={STROKE}
-            fill="none"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={dashOffset}
-            strokeLinecap="round"
-            transform={`rotate(-90 ${CENTER} ${CENTER})`}
-          />
-        </svg>
-
-        {/* Center Content */}
+        {/* Header */}
         <div
           style={{
-            position: "absolute",
-            inset: 0,
             display: "flex",
-            flexDirection: "column",
+            justifyContent: "space-between",
             alignItems: "center",
-            justifyContent: "center",
-            gap: "6px",
           }}
         >
-          <div
-            className="numeric"
-            style={{
-              fontSize: "32px",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            {minutes}:{seconds.toString().padStart(2, "0")}
-          </div>
+          <div className="section-label">Pomodoro</div>
 
-          <div
+          <button
+            onClick={() => setShowSettings(true)}
             style={{
-              fontSize: "11px",
-              fontWeight: 600,
-              letterSpacing: "0.14em",
-              color: accent,
+              background: "transparent",
+              border: "none",
+              color: "var(--text-muted)",
+              cursor: "pointer",
+              fontSize: "16px",
             }}
           >
-            {mode === "FOCUS" ? "FOCUS NOW" : "BREAK"}
+            ⚙
+          </button>
+        </div>
+
+        {/* Timer Dial */}
+        <div
+          style={{
+            width: SIZE,
+            height: SIZE,
+            margin: "0 auto",
+            position: "relative",
+          }}
+        >
+          <svg width={SIZE} height={SIZE}>
+            <circle
+              cx={CENTER}
+              cy={CENTER}
+              r={RADIUS}
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={STROKE}
+              fill="none"
+            />
+
+            <circle
+              cx={CENTER}
+              cy={CENTER}
+              r={RADIUS}
+              stroke={accent}
+              strokeWidth={STROKE}
+              fill="none"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${CENTER} ${CENTER})`}
+            />
+          </svg>
+
+          {/* Center Content */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+            }}
+          >
+            <div
+              className="numeric"
+              style={{
+                fontSize: "32px",
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {minutes}:{seconds.toString().padStart(2, "0")}
+            </div>
+
+            <div
+              style={{
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.14em",
+                color: accent,
+              }}
+            >
+              {mode === "FOCUS" ? "FOCUS NOW" : "BREAK"}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Controls */}
-      <div style={{ display: "flex", gap: "10px" }}>
-        <button style={{ flex: 1 }} onClick={() => setRunning(true)}>
-          Start
-        </button>
+        {/* Controls */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button style={{ flex: 1 }} onClick={() => setRunning(true)}>
+            Start
+          </button>
 
-        <button
-          style={{ flex: 1 }}
-          onClick={() => {
-            setRunning(false);
-            setMode("FOCUS");
-            setSecondsLeft(studyMinutes * 60);
-          }}
-        >
-          Reset
-        </button>
-
-        {mode === "BREAK" && (
           <button
             style={{ flex: 1 }}
             onClick={() => {
+              setRunning(false);
               setMode("FOCUS");
               setSecondsLeft(studyMinutes * 60);
             }}
           >
-            Skip
+            Reset
           </button>
-        )}
+
+          {mode === "BREAK" && (
+            <button
+              style={{ flex: 1 }}
+              onClick={() => {
+                setMode("FOCUS");
+                setSecondsLeft(studyMinutes * 60);
+              }}
+            >
+              Skip
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* ================= SETTINGS MODAL ================= */}
-
+      {/* ================= SETTINGS MODAL (VIEWPORT) ================= */}
       {showSettings && (
         <div
           style={{
-            position: "absolute",
+            position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.65)",
+            background: "rgba(0,0,0,0.75)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            borderRadius: "12px",
-            zIndex: 10,
+            zIndex: 1000,
+            padding: "24px",
           }}
         >
           <div
             style={{
-              width: "280px",
+              width: "420px",
+              maxWidth: "100%",
               background: "var(--bg-card)",
               border: "1px solid var(--border-subtle)",
-              borderRadius: "12px",
-              padding: "20px",
+              borderRadius: "16px",
+              padding: "24px",
               display: "flex",
               flexDirection: "column",
-              gap: "12px",
+              gap: "20px",
             }}
           >
+            {/* Header */}
             <div
               style={{
                 display: "flex",
@@ -228,7 +231,9 @@ export default function Pomodoro() {
                 alignItems: "center",
               }}
             >
-              <div style={{ fontWeight: 600 }}>Settings</div>
+              <div style={{ fontSize: "16px", fontWeight: 600 }}>
+                Pomodoro Settings
+              </div>
 
               <button
                 onClick={() => setShowSettings(false)}
@@ -236,6 +241,7 @@ export default function Pomodoro() {
                   background: "transparent",
                   border: "none",
                   color: "var(--text-muted)",
+                  fontSize: "18px",
                   cursor: "pointer",
                 }}
               >
@@ -243,46 +249,104 @@ export default function Pomodoro() {
               </button>
             </div>
 
-            <div>
-              <label style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Study (minutes)
-              </label>
-              <input
-                type="number"
-                value={tempStudy}
-                onChange={(e) => setTempStudy(+e.target.value)}
-                style={{ width: "100%", marginTop: "4px" }}
-              />
+            {/* Body */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <label
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  Study duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  value={tempStudy}
+                  onChange={(e) => setTempStudy(+e.target.value)}
+                  style={{
+                    height: "40px",
+                    padding: "0 12px",
+                    borderRadius: "8px",
+                    border: "1px solid var(--border-subtle)",
+                    background: "var(--bg-main)",
+                    color: "var(--text-primary)",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <label
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  Break duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  value={tempBreak}
+                  onChange={(e) => setTempBreak(+e.target.value)}
+                  style={{
+                    height: "40px",
+                    padding: "0 12px",
+                    borderRadius: "8px",
+                    border: "1px solid var(--border-subtle)",
+                    background: "var(--bg-main)",
+                    color: "var(--text-primary)",
+                  }}
+                />
+              </div>
             </div>
 
-            <div>
-              <label style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Break (minutes)
-              </label>
-              <input
-                type="number"
-                value={tempBreak}
-                onChange={(e) => setTempBreak(+e.target.value)}
-                style={{ width: "100%", marginTop: "4px" }}
-              />
-            </div>
-
-            <button
-              onClick={() => {
-                setStudyMinutes(tempStudy);
-                setBreakMinutes(tempBreak);
-                setMode("FOCUS");
-                setRunning(false);
-                setSecondsLeft(tempStudy * 60);
-                setShowSettings(false);
+            {/* Footer */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
               }}
-              style={{ marginTop: "6px" }}
             >
-              Save
-            </button>
+              <button
+                onClick={() => setShowSettings(false)}
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-secondary)",
+                  padding: "8px 14px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  setStudyMinutes(tempStudy);
+                  setBreakMinutes(tempBreak);
+                  setMode("FOCUS");
+                  setRunning(false);
+                  setSecondsLeft(tempStudy * 60);
+                  setShowSettings(false);
+                }}
+                style={{
+                  background: "var(--accent-purple)",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
