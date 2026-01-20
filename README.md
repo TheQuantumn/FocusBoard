@@ -1,41 +1,71 @@
-<<<<<<< HEAD
-# FocusBoard
-A full-stack daily productivity web app built with Next.js and Prisma, featuring a Kanban task board, Pomodoro timer, and per-user data persistence.
-=======
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FocusBoard 🧠⏱️
 
-## Getting Started
+**FocusBoard** is a modern, full-stack productivity web application designed for deep work.  
+It combines a **Pomodoro timer**, **Kanban task board**, and **ambient focus tools** into a single, distraction-free dashboard.
 
-First, run the development server:
+Built with a premium SaaS-style UI and per-user data persistence, FocusBoard is intended as a **portfolio-grade project** demonstrating real-world full-stack engineering.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
+<img width="960" height="540" alt="image" src="https://github.com/user-attachments/assets/679958cb-8cdc-443e-b63a-879a723a152b" />
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ✨ Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🗂 Kanban Task Board
+- Columns: **To Do / Ongoing / Completed**
+- Drag & drop between columns
+- Smooth drag animations and hover states
+- Per-user task isolation
+- Delete completed tasks in bulk
+- Glassmorphic board container over animated background
 
-## Learn More
+### ⏱ Pomodoro Timer
+- Focus / Break cycles
+- Circular progress ring
+- Start / Reset / Skip Break
+- Customizable focus & break durations
+- Minimal, distraction-free design
 
-To learn more about Next.js, take a look at the following resources:
+### 🎵 Spotify Focus Player
+- Embedded Spotify playlist
+- Responsive layout (fills available space)
+- Designed for long focus sessions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🔐 Authentication
+- Email + password authentication
+- Cookie-based sessions (no JWT on client)
+- Login / Signup pages with animated DarkVeil background
+- Redirect flow:
+  - Signup → Login (prefilled credentials)
+  - Login → Board
+- Logout support
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🌌 Ambient UI
+- **DarkVeil shader background** (WebGL)
+- Subtle glassmorphism with backdrop blur
+- Dark modern SaaS dashboard aesthetic
+- Inter font with proper typographic hierarchy
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧱 Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
->>>>>>> 004d511 (Project initialization)
+### Frontend
+- **Next.js (App Router)**
+- **TypeScript**
+- **React**
+- **Inter Font**
+- Custom CSS variables (no UI libraries)
+
+### Backend
+- **Next.js API Routes**
+- **Prisma ORM**
+- **SQLite**
+- Cookie-based authentication
+- Per-user data persistence
+
+### Graphics
+- **OGL (WebGL)** for DarkVeil animated background
+
+
+
