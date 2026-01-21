@@ -81,17 +81,26 @@ export default function BoardClient() {
 
   return (
     <>
+      {/* ================= MOBILE RESPONSIVE STYLES ================= */}
+      <style>{`
+        .kanban-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+          .kanban-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+
       {/* ================= BOARD ================= */}
       <div className="card">
         <h2 style={{ marginBottom: "20px" }}>Task Board</h2>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "20px",
-          }}
-        >
+        <div className="kanban-grid">
           <Column
             title="To Do"
             status="TODO"
@@ -132,7 +141,7 @@ export default function BoardClient() {
         </div>
       </div>
 
-      {/* ================= MODAL (VIEWPORT LEVEL) ================= */}
+      {/* ================= MODAL ================= */}
       {showAdd && (
         <div
           style={{
@@ -159,119 +168,32 @@ export default function BoardClient() {
               gap: "20px",
             }}
           >
-            {/* Header */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ fontSize: "16px", fontWeight: 600 }}>
-                Add Task
-              </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ fontWeight: 600 }}>Add Task</div>
               <button
                 onClick={() => setShowAdd(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "var(--text-muted)",
-                  fontSize: "18px",
-                  cursor: "pointer",
-                }}
+                style={{ background: "transparent", border: "none" }}
               >
                 ✕
               </button>
             </div>
 
-            {/* Body */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  Title
-                </label>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Finish Kanban UI"
-                  style={{
-                    height: "40px",
-                    padding: "0 12px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--border-subtle)",
-                    background: "var(--bg-main)",
-                    color: "var(--text-primary)",
-                  }}
-                />
-              </div>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task title"
+            />
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  Description (optional)
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  placeholder="Additional details"
-                  style={{
-                    padding: "10px 12px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--border-subtle)",
-                    background: "var(--bg-main)",
-                    color: "var(--text-primary)",
-                    resize: "none",
-                  }}
-                />
-              </div>
-            </div>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              placeholder="Description (optional)"
+            />
 
-            {/* Footer */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "10px",
-              }}
-            >
-              <button
-                onClick={() => setShowAdd(false)}
-                style={{
-                  background: "transparent",
-                  border: "1px solid var(--border-subtle)",
-                  color: "var(--text-secondary)",
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={createTask}
-                style={{
-                  background: "var(--accent-purple)",
-                  color: "#fff",
-                  border: "none",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Add Task
-              </button>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button onClick={() => setShowAdd(false)}>Cancel</button>
+              <button onClick={createTask}>Add Task</button>
             </div>
           </div>
         </div>
@@ -325,89 +247,49 @@ function Column({
         display: "flex",
         flexDirection: "column",
         gap: "12px",
-        background: isDragOver
-          ? "rgba(255,255,255,0.03)"
-          : "transparent",
-        transition: "background 120ms ease",
+        background: isDragOver ? "rgba(255,255,255,0.03)" : "transparent",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
         <div className="section-label">{title}</div>
         {rightAction}
       </div>
 
       {tasks
         .filter((t) => t.status === status)
-        .map((task) => {
-          const isDragging = draggingId === task.id;
-
-          return (
-            <div
-              key={task.id}
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("taskId", task.id);
-                onDragStart(task.id);
-              }}
-              onDragEnd={onDragEnd}
-              style={{
-                background: "var(--bg-card)",
-                border: "1px solid var(--border-subtle)",
-                borderLeft: `4px solid ${
-                  status === "TODO"
-                    ? "var(--accent-blue)"
-                    : status === "ONGOING"
-                    ? "var(--accent-purple)"
-                    : "var(--accent-green)"
-                }`,
-                borderRadius: "10px",
-                padding: "12px 14px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "6px",
-                cursor: "grab",
-                opacity: isDragging ? 0.5 : 1,
-                transform: isDragging ? "scale(0.97)" : "scale(1)",
-                transition:
-                  "transform 120ms ease, opacity 120ms ease, background 120ms ease",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "var(--bg-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "var(--bg-card)")
-              }
-            >
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                }}
-              >
-                {task.title}
+        .map((task) => (
+          <div
+            key={task.id}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("taskId", task.id);
+              onDragStart(task.id);
+            }}
+            onDragEnd={onDragEnd}
+            style={{
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
+              borderLeft: `4px solid ${
+                status === "TODO"
+                  ? "var(--accent-blue)"
+                  : status === "ONGOING"
+                  ? "var(--accent-purple)"
+                  : "var(--accent-green)"
+              }`,
+              borderRadius: "10px",
+              padding: "12px",
+              cursor: "grab",
+              opacity: draggingId === task.id ? 0.5 : 1,
+            }}
+          >
+            <div style={{ fontWeight: 600 }}>{task.title}</div>
+            {task.description && (
+              <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                {task.description}
               </div>
-
-              {task.description && (
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {task.description}
-                </div>
-              )}
-            </div>
-          );
-        })}
+            )}
+          </div>
+        ))}
     </div>
   );
 }
