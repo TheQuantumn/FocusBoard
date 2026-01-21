@@ -22,7 +22,7 @@ export default function BoardClient() {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
 
-  // ✅ Mobile tap-to-move state
+  // ✅ Mobile tap-to-move
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const isMobile =
@@ -42,21 +42,28 @@ export default function BoardClient() {
   async function createTask() {
     if (!title.trim()) return;
 
-    await fetch("/api/tasks", {
+    const res = await fetch("/api/tasks", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, description }),
     });
 
+    const newTask = await res.json();
+
+    // ✅ Optimistic add
+    setTasks((prev) => [...prev, newTask]);
+
     setTitle("");
     setDescription("");
     setShowAdd(false);
-    await loadTasks();
   }
 
   async function deleteCompleted() {
     const completed = tasks.filter((t) => t.status === "COMPLETED");
+
+    // ✅ Optimistic delete
+    setTasks((prev) => prev.filter((t) => t.status !== "COMPLETED"));
 
     await Promise.all(
       completed.map((t) =>
@@ -66,22 +73,31 @@ export default function BoardClient() {
         })
       )
     );
-
-    await loadTasks();
   }
 
-  async function handleDrop(taskId: string, newStatus: TaskStatus) {
+  async function handleMove(taskId: string, newStatus: TaskStatus) {
+    // ✅ Instant UI update
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId ? { ...t, status: newStatus } : t
+      )
+    );
+
+    setDraggingId(null);
     setDragOverStatus(null);
     setSelectedTaskId(null);
 
-    await fetch(`/api/tasks/${taskId}`, {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
-
-    await loadTasks();
+    try {
+      await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch {
+      // rollback on failure
+      loadTasks();
+    }
   }
 
   if (loading) return <p className="muted">Loading…</p>;
@@ -106,11 +122,11 @@ export default function BoardClient() {
       <div className="card">
         <h2 style={{ marginBottom: "12px" }}>Task Board</h2>
 
-        {/* ===== Mobile instruction ===== */}
+        {/* ===== Mobile hint ===== */}
         {isMobile && selectedTaskId && (
           <div
             style={{
-              marginBottom: "16px",
+              marginBottom: "14px",
               fontSize: "13px",
               textAlign: "center",
               color: "var(--accent-purple)",
@@ -139,7 +155,7 @@ export default function BoardClient() {
                 setSelectedTaskId={setSelectedTaskId}
                 dragOverStatus={dragOverStatus}
                 setDragOverStatus={setDragOverStatus}
-                onDropTask={handleDrop}
+                onMove={handleMove}
                 onDragStart={setDraggingId}
                 onDragEnd={() => setDraggingId(null)}
                 rightAction={
@@ -183,18 +199,27 @@ export default function BoardClient() {
             }}
           >
             <strong>Add Task</strong>
+
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Task title"
             />
+
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
               placeholder="Description"
             />
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+              }}
+            >
               <button onClick={() => setShowAdd(false)}>Cancel</button>
               <button onClick={createTask}>Add</button>
             </div>
@@ -216,7 +241,7 @@ function Column({
   setSelectedTaskId,
   dragOverStatus,
   setDragOverStatus,
-  onDropTask,
+  onMove,
   onDragStart,
   onDragEnd,
   rightAction,
@@ -229,14 +254,15 @@ function Column({
   setSelectedTaskId: (id: string | null) => void;
   dragOverStatus: TaskStatus | null;
   setDragOverStatus: (s: TaskStatus | null) => void;
-  onDropTask: (taskId: string, status: TaskStatus) => void;
+  onMove: (taskId: string, status: TaskStatus) => void;
   onDragStart: (id: string) => void;
   onDragEnd: () => void;
   rightAction?: React.ReactNode;
 }) {
-  const isDragOver = dragOverStatus === status;
   const isMobile =
     typeof window !== "undefined" && window.innerWidth < 768;
+
+  const isDragOver = dragOverStatus === status;
 
   return (
     <div
@@ -247,18 +273,18 @@ function Column({
       onDrop={(e) => {
         const taskId =
           e.dataTransfer.getData("taskId") || selectedTaskId;
-        if (taskId) onDropTask(taskId, status);
+        if (taskId) onMove(taskId, status);
       }}
       onClick={() => {
         if (isMobile && selectedTaskId) {
-          onDropTask(selectedTaskId, status);
+          onMove(selectedTaskId, status);
         }
       }}
       style={{
         border: "1px solid var(--border-subtle)",
         borderRadius: "14px",
         padding: "16px",
-        minHeight: "320px",
+        minHeight: "300px",
         display: "flex",
         flexDirection: "column",
         gap: "12px",
@@ -313,6 +339,7 @@ function Column({
                 boxShadow: isSelected
                   ? "0 0 0 2px rgba(168,85,247,0.35)"
                   : "none",
+                transition: "all 120ms ease",
               }}
             >
               <div style={{ fontWeight: 600 }}>{task.title}</div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Pomodoro from "./Pomodoro";
 import BoardClient from "./BoardClient";
@@ -7,15 +8,23 @@ import DarkVeil from "../components/DarkVeil";
 
 export default function BoardPage() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
     });
-
     router.push("/login");
   }
+
+  // 🔑 Reveal page only after first paint
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      setReady(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   return (
     <main
@@ -39,35 +48,46 @@ export default function BoardPage() {
         <DarkVeil speed={0.18} warpAmount={0.08} noiseIntensity={0.015} />
       </div>
 
+      {/* ===== LOADER ===== */}
+      {!ready && (
+        <div className="page-loader">
+          <div className="loader-dot" />
+          <div className="loader-dot" />
+          <div className="loader-dot" />
+        </div>
+      )}
+
       {/* ===== CONTENT ===== */}
-      <div className="board-root">
-        {/* ===== TOP BAR ===== */}
-        <div className="top-bar">
-          <button className="logout-btn" onClick={handleLogout}>
-            Log out
-          </button>
-        </div>
-
-        {/* ===== TOP ROW ===== */}
-        <div className="top-row">
-          <div className="pomodoro-wrap">
-            <Pomodoro />
+      {ready && (
+        <div className="board-root fade-in">
+          {/* TOP BAR */}
+          <div className="top-bar">
+            <button className="logout-btn" onClick={handleLogout}>
+              Log out
+            </button>
           </div>
 
-          <div className="spotify-wrap">
-            <iframe
-              src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcxvFzl58uP7"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            />
+          {/* TOP ROW */}
+          <div className="top-row">
+            <div className="pomodoro-wrap">
+              <Pomodoro />
+            </div>
+
+            <div className="spotify-wrap">
+              <iframe
+                src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcxvFzl58uP7"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            </div>
           </div>
+
+          {/* KANBAN */}
+          <BoardClient />
         </div>
+      )}
 
-        {/* ===== KANBAN ===== */}
-        <BoardClient />
-      </div>
-
-      {/* ===== RESPONSIVE STYLES ===== */}
+      {/* ===== STYLES ===== */}
       <style jsx>{`
         .board-root {
           position: relative;
@@ -121,6 +141,62 @@ export default function BoardPage() {
           border: none;
         }
 
+        /* ===== LOADER ===== */
+        .page-loader {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          z-index: 10;
+        }
+
+        .loader-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: var(--accent-purple);
+          animation: pulse 1.2s infinite ease-in-out;
+        }
+
+        .loader-dot:nth-child(2) {
+          animation-delay: 0.15s;
+        }
+
+        .loader-dot:nth-child(3) {
+          animation-delay: 0.3s;
+        }
+
+        @keyframes pulse {
+          0%,
+          80%,
+          100% {
+            transform: scale(0.6);
+            opacity: 0.4;
+          }
+          40% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+
+        /* ===== FADE IN ===== */
+        .fade-in {
+          animation: fadeIn 260ms ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(4px);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+
         /* ===== MOBILE ===== */
         @media (max-width: 768px) {
           .board-root {
@@ -132,17 +208,11 @@ export default function BoardPage() {
             flex-direction: column;
           }
 
-          .pomodoro-wrap {
-            flex: none;
-          }
-
           .spotify-wrap {
-            flex: none;
             height: 260px;
           }
         }
 
-        /* ===== SMALL PHONES ===== */
         @media (max-width: 480px) {
           .spotify-wrap {
             height: 220px;

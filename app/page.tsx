@@ -1,6 +1,17 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import DarkVeil from "./components/DarkVeil";
 
 export default function HomePage() {
+  const [ready, setReady] = useState(false);
+
+  // Reveal hero after first paint
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
     <main
       style={{
@@ -8,124 +19,156 @@ export default function HomePage() {
         minHeight: "100vh",
         background: "var(--bg-main)",
         overflow: "hidden",
-        isolation: "isolate", // 🔑 forces correct stacking
+        isolation: "isolate",
       }}
     >
       {/* ===== BACKGROUND ===== */}
       <DarkVeil />
 
-     
-
       {/* ===== HERO CONTENT ===== */}
-     <section
-  style={{
-    position: "relative",
-    zIndex: 2,
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "0 24px",
-    textAlign: "center",
-  }}
->
-  <div
-    style={{
-      maxWidth: "1100px",
-      width: "100%",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "28px",
-    }}
-  >
-    {/* Badge */}
-    <div
-      style={{
-        fontSize: "12px",
-        fontWeight: 600,
-        letterSpacing: "0.12em",
-        color: "var(--accent-purple)",
-        textTransform: "uppercase",
-      }}
-    >
-      Productivity • Focus • Flow
-    </div>
-
-    {/* Headline */}
-    <h1
-      style={{
-        fontSize: "56px",
-        fontWeight: 700,
-        lineHeight: 1.1,
-        letterSpacing: "-0.03em",
-        maxWidth: "900px",
-        margin: 0,
-      }}
-    >
-      Focus better.
-      <br />
-      Get things done.
-    </h1>
-
-    {/* Subheading */}
-    <p
-      style={{
-        fontSize: "18px",
-        color: "var(--text-secondary)",
-        maxWidth: "640px",
-        lineHeight: 1.6,
-        margin: 0,
-      }}
-    >
-      FocusBoard is a modern productivity dashboard with a Pomodoro timer,
-      Kanban task board, and ambient focus tools — built for deep work.
-    </p>
-
-    {/* CTAs */}
-    <div style={{ display: "flex", gap: "14px", marginTop: "12px" }}>
-      <a
-        href="/signup"
+      <section
+        className={ready ? "hero fade-in-slow" : "hero"}
         style={{
-          background: "var(--accent-purple)",
-          color: "#000",
-          padding: "12px 20px",
-          borderRadius: "10px",
-          fontWeight: 600,
-          textDecoration: "none",
+          position: "relative",
+          zIndex: 2,
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 24px",
+          textAlign: "center",
         }}
       >
-        Get Started
-      </a>
+        <div
+          style={{
+            maxWidth: "1100px",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "28px",
+          }}
+        >
+          {/* Badge */}
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.12em",
+              color: "var(--accent-purple)",
+              textTransform: "uppercase",
+            }}
+          >
+            Productivity • Focus • Flow
+          </div>
 
-      <a
-        href="/login"
-        style={{
-          border: "1px solid var(--border-subtle)",
-          padding: "12px 20px",
-          borderRadius: "10px",
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          textDecoration: "none",
-        }}
-      >
-        Log in
-      </a>
-    </div>
+          {/* Headline */}
+          <h1
+            style={{
+              fontSize: "56px",
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: "-0.03em",
+              maxWidth: "900px",
+              margin: 0,
+            }}
+          >
+            Focus better.
+            <br />
+            Get things done.
+          </h1>
 
-    {/* Footer text */}
-    <div
-      style={{
-        marginTop: "24px",
-        fontSize: "13px",
-        color: "var(--text-muted)",
-      }}
-    >
-      Built with Next.js • TypeScript • Prisma
-    </div>
-  </div>
-</section>
+          {/* Subheading */}
+          <p
+            style={{
+              fontSize: "18px",
+              color: "var(--text-secondary)",
+              maxWidth: "640px",
+              lineHeight: 1.6,
+              margin: 0,
+            }}
+          >
+            FocusBoard is a modern productivity dashboard with a Pomodoro timer,
+            Kanban task board, and ambient focus tools — built for deep work.
+          </p>
 
+          {/* CTAs */}
+          <div style={{ display: "flex", gap: "14px", marginTop: "12px" }}>
+            <a
+              href="/signup"
+              style={{
+                background: "var(--accent-purple)",
+                color: "#000",
+                padding: "12px 20px",
+                borderRadius: "10px",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              Get Started
+            </a>
+
+            <a
+              href="/login"
+              style={{
+                border: "1px solid var(--border-subtle)",
+                padding: "12px 20px",
+                borderRadius: "10px",
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                textDecoration: "none",
+              }}
+            >
+              Log in
+            </a>
+          </div>
+
+          {/* Footer */}
+          <div
+            style={{
+              marginTop: "24px",
+              fontSize: "13px",
+              color: "var(--text-muted)",
+            }}
+          >
+            Built with Next.js • TypeScript • Prisma
+          </div>
+        </div>
+      </section>
+
+      {/* ===== ANIMATION STYLES ===== */}
+      <style jsx>{`
+        .hero {
+          opacity: 0;
+        }
+
+        .fade-in-slow {
+          animation: heroFadeIn 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes heroFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (max-width: 768px) {
+          h1 {
+            font-size: 42px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          h1 {
+            font-size: 34px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
