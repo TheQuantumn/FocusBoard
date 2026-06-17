@@ -1,0 +1,72 @@
+---
+- name: Deploy FocusBoard
+  hosts: app
+  become: true
+
+  vars:
+    docker_image: "snaripp/focusboard:latest"
+    app_port: 3000
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull latest image
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+        force_source: yes
+
+    - name: Stop existing container
+      docker_container:
+        name: focusboard
+        state: absent
+      ignore_errors: yes
+
+    - name: Run container
+      docker_container:
+        name: focusboard
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "3000:3000"
+        env:
+          DATABASE_URL: "{{ database_url }}"

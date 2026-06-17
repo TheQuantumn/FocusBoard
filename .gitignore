@@ -45,3 +45,9 @@ next-env.d.ts
 /app/generated/prisma
 prisma/dev.db
 prisma/dev.db-journal
+infra/terraform/.terraform/
+infra/terraform/terraform.tfstate
+infra/terraform/terraform.tfstate.backup
+infra/terraform/*.tfstate*
+terraform.tfstate
+terraform.tfstate.backup
