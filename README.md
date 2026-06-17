@@ -43,22 +43,7 @@ This repository also serves as a **complete DevOps reference implementation** �
 
 This project is deployed entirely on AWS, with every layer of infrastructure defined as code.
 
-```
-GitHub (source + Actions workflow)
-        │
-        ▼
-GitHub Actions CI/CD
-   1. Build Docker image (linux/amd64)
-   2. Push to Docker Hub
-   3. Run Prisma migrations (via SSH tunnel to private RDS)
-   4. Deploy to EC2 (pull image, restart container)
-        │
-        ▼
-   Docker Hub  ──────────────►  AWS EC2 (public subnet)
-                                      │
-                                      ▼
-                              AWS RDS PostgreSQL (private subnet)
-```
+<img width="1440" height="1520" alt="image" src="https://github.com/user-attachments/assets/67d58380-d99c-4681-a11d-2895a0f369a1" />
 
 ### Networking (Terraform-managed)
 - Custom VPC (`10.0.0.0/16`)
