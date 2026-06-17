@@ -114,7 +114,7 @@ export default function LoginPage() {
                 textTransform: "uppercase",
               }}
             >
-              Welcome back
+              Welcome back Procatinator
             </div>
 
             <h2 style={{ fontSize: "26px" }}>Log in to FocusBoard</h2>
